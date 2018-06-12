@@ -24,7 +24,7 @@ public class CtrlRespWrapper {
 		return CtrlRespWrapper.respGenerator(Property.Resp.SUCCESS_CODE, Property.Resp.SUCCESS_MESSAGE, data);
 	}
 	
-	public static <T> RespEntry <T> respGenerator(int code, T data){
+	public static <T> RespEntry<T> respGenerator(int code, T data){
 		return CtrlRespWrapper.respGenerator(code, Property.Resp.SUCCESS_MESSAGE, data);
 	}
 	

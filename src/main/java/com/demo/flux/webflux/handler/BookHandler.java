@@ -2,19 +2,18 @@ package com.demo.flux.webflux.handler;
 
 import com.demo.flux.webflux.entity.BookEntity;
 import com.demo.flux.webflux.exception.BookStorageException;
+import com.demo.flux.webflux.exception.PageFormatException;
 import com.demo.flux.webflux.mapper.BookMapper;
-import com.demo.flux.webflux.wrapper.CtrlRespWrapper;
+import com.demo.flux.webflux.util.FluxUtil;
+import com.demo.flux.webflux.wrapper.MonoCtrlRespWrapper;
 import com.github.pagehelper.PageHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 @Component(value = "bookHandler")
 public class BookHandler {
@@ -27,53 +26,40 @@ public class BookHandler {
 
 	@SuppressWarnings(value = "unused")
 	public Mono<ServerResponse> listAllBooks(ServerRequest request){
-		int page = Integer.valueOf(request.queryParam("page").orElse("1"));
-		int size = Integer.valueOf(request.queryParam("size").orElse("20"));
-		PageHelper.startPage(page, size);
-		return  Mono.justOrEmpty(CtrlRespWrapper.pageRespGenerator(bookMapper.listAllBooks()))
-				.flatMap(pageBookEntity->ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
-						.body(fromObject(pageBookEntity)))
-				.switchIfEmpty(ServerResponse.notFound().build());
+		final String pageString = request.queryParam("page").orElse("1");
+		final String sizeString = request.queryParam("size").orElse("20");
+		try {
+			int page = Integer.valueOf(pageString);
+			int size = Integer.valueOf(sizeString);
+			PageHelper.startPage(page, size);
+		}catch (NumberFormatException ex){
+			throw new PageFormatException(String.format("param input illegal, page = %s, size = %s", pageString, sizeString));
+		}
+		return MonoCtrlRespWrapper.pageRespGenerator(bookMapper.listAllBooks()).flatMap(FluxUtil::serverResponseMono);
 	}
 
 	public Mono<ServerResponse> getBookByPid(ServerRequest request){
 		String pid = request.pathVariable("pid");
-		return Mono.justOrEmpty(CtrlRespWrapper.respGenerator(bookMapper.getBookByPid(pid)))
-				.flatMap(bookEntry->ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8).body(fromObject(bookEntry)))
-				.switchIfEmpty(ServerResponse.notFound().build());
+		return MonoCtrlRespWrapper.respGenerator(bookMapper.getBookByPid(pid)).flatMap(FluxUtil::serverResponseMono);
 	}
 
 	@Transactional(rollbackFor = BookStorageException.class)
 	public Mono<ServerResponse> createBook(ServerRequest request){
-		return request.bodyToMono(BookEntity.class).flatMap(bookEntity ->
-			Mono.justOrEmpty(CtrlRespWrapper.respGenerator(bookMapper.insertBook(bookEntity)))
-					.flatMap(result->ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
-							.body(fromObject(result)))
-		).switchIfEmpty(
-				ServerResponse.ok()
-						.contentType(MediaType.APPLICATION_JSON_UTF8)
-						.body(fromObject(CtrlRespWrapper.errorRespGenerator("POST BODY ERROR")))
-		);
+		return request.bodyToMono(BookEntity.class)
+				.flatMap(bookEntity -> MonoCtrlRespWrapper.respGenerator(bookMapper.insertBook(bookEntity)))
+				.switchIfEmpty(MonoCtrlRespWrapper.errorRespGenerator("Error Occurs In Post Body", null))
+				.flatMap(FluxUtil::serverResponseMono);
 	}
 
 	public Mono<ServerResponse> updateBook(ServerRequest request){
 		return request.bodyToMono(BookEntity.class)
-				.flatMap(bookEntity ->
-						Mono.justOrEmpty(CtrlRespWrapper.respGenerator(bookMapper.updateBookByPid(bookEntity)))
-								.flatMap(result->ServerResponse.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
-										.body(fromObject(result)))
-				).switchIfEmpty(ServerResponse.notFound().build());
+				.flatMap(bookEntity -> MonoCtrlRespWrapper.respGenerator(bookMapper.updateBookByPid(bookEntity)))
+				.switchIfEmpty(MonoCtrlRespWrapper.errorRespGenerator("No Put Body Found.", null))
+				.flatMap(FluxUtil::serverResponseMono);
 	}
 
 	public Mono<ServerResponse> deleteBookByPid(ServerRequest request){
-		return Mono.justOrEmpty(request.queryParam("pid"))
-				.filter(StringUtils::isNotBlank)
-				.flatMap(pid->
-						Mono.justOrEmpty(CtrlRespWrapper.respGenerator(bookMapper.deleteBookByPid(pid)))
-								.flatMap(result->ServerResponse.ok()
-										.contentType(MediaType.APPLICATION_JSON_UTF8)
-										.body(fromObject(result))))
-				.switchIfEmpty(ServerResponse.notFound().build());
-
+		final String pid = request.pathVariable("pid");
+		return MonoCtrlRespWrapper.respGenerator(bookMapper.deleteBookByPid(pid)).flatMap(FluxUtil::serverResponseMono);
 	}
 }
