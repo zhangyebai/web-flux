@@ -21,6 +21,6 @@ import reactor.core.publisher.Mono;
 public class GlobalExceptionHandler{
 	public static Mono<ServerResponse> pathNotFound(ServerRequest request){
 		return MonoCtrlRespWrapper.errorRespGenerator("path: " + request.path() + " not found.", null)
-				.flatMap(FluxUtil::serverResponseMono);
+				.flatMap(FluxUtil::done);
 	}
 }

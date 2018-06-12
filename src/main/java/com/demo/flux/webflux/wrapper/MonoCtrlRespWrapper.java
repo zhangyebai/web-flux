@@ -51,7 +51,12 @@ public class MonoCtrlRespWrapper {
 		return pageRespGenerator(code, Property.Resp.SUCCESS_MESSAGE, data);
 	}
 
+	public static <T> Mono<PageRespEntry<T>> errorPageRespGenerator(String message){
+		return pageRespGenerator(Property.Resp.ERROR_CODE, message, null);
+	}
+
 	public static <T> Mono<PageRespEntry<T>> pageRespGenerator(int code, String message, List<T> data){
 		return Mono.just(new PageRespEntry<T>().setCode(code).setMessage(message).setPage(new Page<>(data)).setData(data));
 	}
+
 }

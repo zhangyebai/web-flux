@@ -33,14 +33,14 @@ public class BookHandler {
 			int size = Integer.valueOf(sizeString);
 			PageHelper.startPage(page, size);
 		}catch (NumberFormatException ex){
-			throw new PageFormatException(String.format("param input illegal, page = %s, size = %s", pageString, sizeString));
+			return FluxUtil.error(String.format("request parameter is illegal, page=%s, size=%s", pageString, sizeString));
 		}
-		return MonoCtrlRespWrapper.pageRespGenerator(bookMapper.listAllBooks()).flatMap(FluxUtil::serverResponseMono);
+		return MonoCtrlRespWrapper.pageRespGenerator(bookMapper.listAllBooks()).flatMap(FluxUtil::done);
 	}
 
 	public Mono<ServerResponse> getBookByPid(ServerRequest request){
 		String pid = request.pathVariable("pid");
-		return MonoCtrlRespWrapper.respGenerator(bookMapper.getBookByPid(pid)).flatMap(FluxUtil::serverResponseMono);
+		return MonoCtrlRespWrapper.respGenerator(bookMapper.getBookByPid(pid)).flatMap(FluxUtil::done);
 	}
 
 	@Transactional(rollbackFor = BookStorageException.class)
@@ -48,18 +48,18 @@ public class BookHandler {
 		return request.bodyToMono(BookEntity.class)
 				.flatMap(bookEntity -> MonoCtrlRespWrapper.respGenerator(bookMapper.insertBook(bookEntity)))
 				.switchIfEmpty(MonoCtrlRespWrapper.errorRespGenerator("Error Occurs In Post Body", null))
-				.flatMap(FluxUtil::serverResponseMono);
+				.flatMap(FluxUtil::done);
 	}
 
 	public Mono<ServerResponse> updateBook(ServerRequest request){
 		return request.bodyToMono(BookEntity.class)
 				.flatMap(bookEntity -> MonoCtrlRespWrapper.respGenerator(bookMapper.updateBookByPid(bookEntity)))
 				.switchIfEmpty(MonoCtrlRespWrapper.errorRespGenerator("No Put Body Found.", null))
-				.flatMap(FluxUtil::serverResponseMono);
+				.flatMap(FluxUtil::done);
 	}
 
 	public Mono<ServerResponse> deleteBookByPid(ServerRequest request){
 		final String pid = request.pathVariable("pid");
-		return MonoCtrlRespWrapper.respGenerator(bookMapper.deleteBookByPid(pid)).flatMap(FluxUtil::serverResponseMono);
+		return MonoCtrlRespWrapper.respGenerator(bookMapper.deleteBookByPid(pid)).flatMap(FluxUtil::done);
 	}
 }
