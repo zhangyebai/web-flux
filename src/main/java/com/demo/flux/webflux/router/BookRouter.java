@@ -35,7 +35,7 @@ public class BookRouter {
 				.andRoute(PUT("/book")
 						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::updateBook)
 				.andRoute(DELETE("/book/{pid}")
-						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::deleteBookByPid)
-				.andRoute(RequestPredicates.all().and(accept(MediaType.ALL)), GlobalExceptionHandler::pathNotFound);
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::deleteBookByPid);
+				//.andRoute(RequestPredicates.all().and(accept(MediaType.ALL)), GlobalExceptionHandler::pathNotFound);
 	}
 }

@@ -37,8 +37,7 @@ public class BookHandler {
 	}
 
 	public Mono<ServerResponse> getBookByPid(ServerRequest request){
-		String pid = request.pathVariable("pid");
-		return ReactorUtil.ok(bookMapper.getBookByPid(pid));
+		return ReactorUtil.ok(bookMapper.getBookByPid(request.pathVariable("pid")));
 	}
 
 	@Transactional(rollbackFor = BookStorageException.class)
