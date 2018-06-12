@@ -2,14 +2,19 @@ package com.demo.flux.webflux.router;
 
 
 import com.demo.flux.webflux.handler.BookHandler;
+import com.demo.flux.webflux.handler.GlobalExceptionHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
+
+import java.util.Objects;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 
@@ -18,10 +23,19 @@ public class BookRouter {
 
 	@Bean
 	public RouterFunction<ServerResponse> bookRouterFunction(@Autowired BookHandler bookHandler){
-		return RouterFunctions.route(GET("/books/all").and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::listAllBooks)
-				.andRoute(GET("/book/{pid}").and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::getBookByPid)
-				.andRoute(POST("/book").and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::createBook)
-				.andRoute(PUT("/book").and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::updateBook)
-				.andRoute(DELETE("/book/{pid}").and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::deleteBookByPid);
+		return RouterFunctions
+				.route(GET("/books/all")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8))
+						.and(queryParam("page", Objects::nonNull))
+						.and(queryParam("size", Objects::nonNull)), bookHandler::listAllBooks)
+				.andRoute(GET("/book/{pid}")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::getBookByPid)
+				.andRoute(POST("/book")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::createBook)
+				.andRoute(PUT("/book")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::updateBook)
+				.andRoute(DELETE("/book/{pid}")
+						.and(accept(MediaType.APPLICATION_JSON_UTF8)), bookHandler::deleteBookByPid)
+				.andRoute(RequestPredicates.all().and(accept(MediaType.ALL)), GlobalExceptionHandler::pathNotFound);
 	}
 }
