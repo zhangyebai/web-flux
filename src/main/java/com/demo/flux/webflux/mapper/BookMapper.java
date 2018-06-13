@@ -13,26 +13,26 @@ import java.util.List;
 public interface BookMapper {
 
 	@ResultType(java.lang.Integer.class)
-	@Insert({"INSERT INTO flux_web.book (name, pid, price, author) VALUES",
+	@Insert({"INSERT INTO webflux.book (name, pid, price, author) VALUES",
 			"(#{bookEntity.name}, #{bookEntity.pid}, #{bookEntity.price}, #{bookEntity.author})"})
 	Integer insertBook(@Param("bookEntity") BookEntity bookEntity);
 
 	@ResultType(java.lang.Integer.class)
-	@Delete({"DELETE FROM flux_web.book WHERE pid=#{pid}"})
+	@Delete({"DELETE FROM webflux.book WHERE pid=#{pid}"})
 	Integer deleteBookByPid(@Param("pid") String pid);
 
 	@ResultType(java.lang.Integer.class)
-	@Update({"UPDATE flux_web.book SET name=#{bookEntity.name}, price=#{bookEntity.price}, author=#{bookEntity.author}",
+	@Update({"UPDATE webflux.book SET name=#{bookEntity.name}, price=#{bookEntity.price}, author=#{bookEntity.author}",
 			"WHERE pid=#{bookEntity.pid}"})
 	Integer updateBookByPid(@Param("bookEntity") BookEntity bookEntity);
 
 	@ResultType(com.demo.flux.webflux.entity.BookEntity.class)
 	@Select({"SELECT name, pid, price, author",
-			"FROM flux_web.book",
+			"FROM webflux.book",
 			"WHERE pid=#{pid} LIMIT 1"})
 	BookEntity getBookByPid(@Param("pid") String pid);
 
 	@ResultType(com.demo.flux.webflux.entity.BookEntity.class)
-	@Select({"SELECT name, pid, price, author FROM flux_web.book"})
+	@Select({"SELECT name, pid, price, author FROM webflux.book"})
 	List<BookEntity> listAllBooks();
 }

@@ -15,6 +15,5 @@ public class ServerSentEventRouter {
 		return RouterFunctions.route(RequestPredicates.GET("/numbers")
 				.and(RequestPredicates.accept(MediaType.TEXT_EVENT_STREAM)),
 				serverSentEventHandler::numbers);
-		//return null;
 	}
 }
