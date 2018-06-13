@@ -2,14 +2,10 @@ package com.demo.flux.webflux.router;
 
 
 import com.demo.flux.webflux.handler.BookHandler;
-import com.demo.flux.webflux.handler.GlobalExceptionHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.config.EnableWebFlux;
-import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
