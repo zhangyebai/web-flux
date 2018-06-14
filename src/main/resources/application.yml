@@ -1,0 +1,28 @@
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          #zkNodes: localhost:2182
+      bindings:
+        input:
+          destination: web-flux
+          contentType: application/json
+        output:
+          destination: web-flux
+          contentType: application/json
+
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/webflux?characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai&autoReconnect=true&failOverReadOnly=false
+    username: root
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+mybatis:
+  config-location: classpath:mybatis-config.xml
+
+
+
